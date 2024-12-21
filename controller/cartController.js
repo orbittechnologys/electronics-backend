@@ -5,24 +5,24 @@ import Product from "../schemas/productSchema.js";
 import { handleErrorResponse, handleNotFound, handleAlreadyExists } from "../utils/responseHandler.js";
 import { findById, paginate } from "../manager/finder.js";
 
-export const addToCart = asyncHandler(async (req, res) => {   
+export const addToCart = asyncHandler(async (req, res) => {
     try {
         const { customerId, productId, quantity } = req.body;
 
         const customer = await findById(Customer, customerId);
         if (!customer) {
-            return handleNotFound(res, "Customer not found",customerId);
+            return handleNotFound(res, "Customer not found", customerId);
         }
 
         const product = await findById(Product, productId);
         if (!product) {
-            return handleNotFound(res, "Product not found",productId);
+            return handleNotFound(res, "Product not found", productId);
         }
 
-        if(quantity > product.stock ){
+        if (quantity > product.stock) {
             return res.status(400).json({
-                msg:"Unfortunately, Product is out of stock",
-                success:false
+                msg: "Unfortunately, Product is out of stock",
+                success: false
             })
         }
 
@@ -37,7 +37,7 @@ export const addToCart = asyncHandler(async (req, res) => {
         }
 
         const existingItem = cart.items.find(
-            (item) => item.product.toString() === product._id.toString() 
+            (item) => item.product.toString() === product._id.toString()
         );
 
         if (existingItem) {
@@ -194,4 +194,60 @@ export const updateCart = asyncHandler(async (req, res) => {
         console.error(error);
         return handleErrorResponse(res, error);
     }
+});
+
+export const removeProductFromCart = asyncHandler(async (req, res) => {
+    try {
+        const { customerId, productId } = req.body;
+
+        if (!customerId || !productId) {
+            return res.status(400).json({
+                success: false,
+                msg: "Customer ID and Product ID are required."
+            });
+        }
+
+        const customer = await findById(Customer, customerId);
+        if (!customer) {
+            return handleNotFound(res, "Customer not found", customerId);
+        }
+
+        const product = await findById(Product, productId);
+        if (!product) {
+            return handleNotFound(res, "Product not found", productId);
+        }
+
+        let cart = await Cart.findOne({ customer: customer._id });
+        if (!cart) {
+            return handleNotFound(res, "Cart not found for the customer", customerId);
+        }
+
+        const existingItem = cart.items.find(
+            (item) => item.product.toString() === product._id.toString()
+        );
+
+        if (!existingItem) {
+            return res.status(404).json({
+                success: false,
+                msg: "Product not found in the cart."
+            });
+        }
+
+        // Remove item from cart
+        cart.items = cart.items.filter(
+            (item) => item.product.toString() !== product._id.toString()
+        );
+
+        // Recalculate total quantity and price
+        cart.totalQty = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        cart.totalPrice = cart.items.reduce((sum, item) => sum + item.price, 0);
+
+        await cart.save();
+
+        return res.status(200).json({ success: true, cart });
+    } catch (error) {
+        console.error(error);
+        return handleErrorResponse(res, error);
+    }
+
 });
