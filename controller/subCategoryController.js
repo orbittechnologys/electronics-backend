@@ -8,6 +8,7 @@ import {
   handleAlreadyExists,
 } from "../utils/responseHandler.js";
 import { findById, paginate } from "../manager/finder.js";
+import Product from "../schemas/productSchema.js";
 
 export const createSubCategory = asyncHandler(async (req, res) => {
   try {
@@ -42,24 +43,33 @@ export const createSubCategory = asyncHandler(async (req, res) => {
 });
 
 export const deleteSubCategory = asyncHandler(async (req, res) => {
-    try {
-      const { id } = req.params;
-  
-      const subCategory = await SubCategories.findByIdAndDelete(id);
-      if (!subCategory) {
-        return handleNotFound(res, "SubCategory", id);
-      }
-  
-      return res.status(200).json({
-        success: true,
-        msg: "SubCategory deleted successfully",
-        subCategory,
-      });
-    } catch (error) {
-      console.error(error);
-      return handleErrorResponse(res, error);
+  try {
+    const { id } = req.params;
+
+    const subCategory = await SubCategories.findById(id);
+    if (!subCategory) {
+      return handleNotFound(res, "SubCategory", id);
     }
-  });
+
+    const deletedProducts = await Product.deleteMany({
+      subcategory: id,
+    });
+
+    console.log(`Deleted products count: ${deletedProducts.deletedCount}`);
+
+    await SubCategories.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      msg: "SubCategory and related products deleted successfully",
+      subCategory,
+      deletedProductsCount: deletedProducts.deletedCount,
+    });
+  } catch (error) {
+    console.error(error);
+    return handleErrorResponse(res, error);
+  }
+});
 
 export const fetchAllSubCategories = asyncHandler(async (req, res) => {
   try {
