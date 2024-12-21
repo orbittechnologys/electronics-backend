@@ -7,6 +7,7 @@ import productRouter from "./productRouter.js";
 import cartRouter from "./cartRouter.js";
 import customerAddressRouter from "./customerAddressRouter.js";
 import orderRouter from "./orderRouter.js";
+import feedbackRouter from "./feedbackRouter.js";
 
 const appRoutes = expressRouter();
 
@@ -18,5 +19,6 @@ appRoutes.use("/product",productRouter);
 appRoutes.use("/cart",cartRouter);
 appRoutes.use("/customerAddress",customerAddressRouter);
 appRoutes.use("/order",orderRouter);
+appRoutes.use("/feedback", feedbackRouter);
 
 export default appRoutes;
