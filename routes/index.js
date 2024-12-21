@@ -5,6 +5,7 @@ import categoryRouter from "./categoryRouter.js";
 import subcategoryRouter from "./subcategoryRouter.js";
 import productRouter from "./productRouter.js";
 import cartRouter from "./cartRouter.js";
+import feedbackRouter from "./feedbackRouter.js";
 
 const appRoutes = expressRouter();
 
@@ -14,5 +15,6 @@ appRoutes.use("/category",categoryRouter);
 appRoutes.use("/subcategory",subcategoryRouter);
 appRoutes.use("/product",productRouter);
 appRoutes.use("/cart",cartRouter);
+appRoutes.use("/feedback", feedbackRouter);
 
 export default appRoutes;
