@@ -2,7 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import mongooseConnection from "./mongo.js";
-// import appRoutes from './routes/index.js'
+import appRoutes from './routes/index.js'
 import fs from 'fs';
 import dotenv from 'dotenv';
 import https from 'https';
@@ -36,7 +36,7 @@ app.use(
     })
   })
 
-//   app.use("/api", appRoutes);
+  app.use("/api", appRoutes);
 
   if(process.env.DEPLOY_ENV === "local"){
     app.listen(port, (req, res) => {
