@@ -39,7 +39,8 @@ export const createProduct = asyncHandler(async (req,res) => {
             stock,
             price,
             inflatePrice,
-            featureList
+            featureList,
+            status:"ACTIVE"
         });
 
         return res.status(200).json({
